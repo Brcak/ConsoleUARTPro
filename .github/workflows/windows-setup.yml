@@ -23,7 +23,11 @@ jobs:
         run: choco install nsis --yes --no-progress
       - name: Build Setup.exe
         shell: pwsh
-        run: '& "${env:ProgramFiles(x86)}\NSIS\makensis.exe" installer\ConsoleUARTPro.nsi'
+        run: |
+          $nsis = Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'
+          if (!(Test-Path $nsis)) { throw "NSIS not found at $nsis" }
+          & $nsis /V4 installer\ConsoleUARTPro.nsi
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v4
         with:
           name: ConsoleUARTPro-Setup
