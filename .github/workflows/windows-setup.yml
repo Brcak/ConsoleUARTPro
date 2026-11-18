@@ -1,0 +1,36 @@
+name: Build Windows Setup EXE
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'firmware/**'
+      - 'hardware/**'
+      - 'installer/**'
+      - '.github/workflows/windows-setup.yml'
+jobs:
+  setup:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore
+        run: dotnet restore tests/ConsoleUARTPro.Tests/ConsoleUARTPro.Tests.csproj
+      - name: Run tests
+        run: dotnet test tests/ConsoleUARTPro.Tests/ConsoleUARTPro.Tests.csproj --configuration Release --no-restore
+      - name: Publish Windows application
+        run: dotnet publish src/ConsoleUARTPro/ConsoleUARTPro.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true --output publish
+      - name: Install NSIS
+        shell: pwsh
+        run: choco install nsis --yes --no-progress
+      - name: Build Setup.exe
+        shell: pwsh
+        run: '& "${env:ProgramFiles(x86)}\NSIS\makensis.exe" installer\ConsoleUARTPro.nsi'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ConsoleUARTPro-Setup
+          path: ConsoleUARTPro-Setup.exe
+          if-no-files-found: error
