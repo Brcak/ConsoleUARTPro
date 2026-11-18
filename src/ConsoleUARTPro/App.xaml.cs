@@ -1,0 +1,1 @@
+using System.Windows; namespace ConsoleUARTPro; public partial class App : Application { }
