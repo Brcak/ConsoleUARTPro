@@ -14,6 +14,9 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+      - name: Generate app icon
+        shell: pwsh
+        run: ./scripts/Generate-Icon.ps1
       - name: Restore
         run: dotnet restore src/ConsoleUARTPro/ConsoleUARTPro.csproj
       - name: Publish Windows application
