@@ -19,4 +19,24 @@ using System; using System.Net.Http; using System.Diagnostics; using System.Text
    } catch(Exception ex) when(ex is HttpRequestException or TaskCanceledException or JsonException or InvalidOperationException) { UpdateCheckStatus.Text="Unable to check for updates: "+ex.Message; }
  }
  void OpenReleases_Click(object sender,RoutedEventArgs e) { Process.Start(new ProcessStartInfo("https://github.com/Brcak/ConsoleUARTPro/releases"){UseShellExecute=true}); }
+ 
+ void OpenLog_Click(object sender,RoutedEventArgs e) {
+   var dialog=new OpenFileDialog{Filter="Text logs|*.txt;*.log|All files|*.*"};
+   if(dialog.ShowDialog()!=true)return;
+   try { Log.Text=File.ReadAllText(dialog.FileName); Status.Text="Opened log: "+Path.GetFileName(dialog.FileName); MainTabs.SelectedIndex=0; }
+   catch(Exception ex) when(ex is IOException or UnauthorizedAccessException) { MessageBox.Show(ex.Message,"Open log failed",MessageBoxButton.OK,MessageBoxImage.Error); }
+ }
+ void CopyLog_Click(object sender,RoutedEventArgs e) {
+   if(!string.IsNullOrEmpty(Log.SelectedText)) Clipboard.SetText(Log.SelectedText);
+   else if(!string.IsNullOrEmpty(Log.Text)) Clipboard.SetText(Log.Text);
+ }
+ void ClearLog_Click(object sender,RoutedEventArgs e) {
+   if(string.IsNullOrEmpty(Log.Text))return;
+   if(MessageBox.Show("Clear the current UART log? Save it first if needed.","Clear log",MessageBoxButton.YesNo,MessageBoxImage.Warning)==MessageBoxResult.Yes)Log.Clear();
+ }
+ void Exit_Click(object sender,RoutedEventArgs e) => Close();
+ void SettingsMenu_Click(object sender,RoutedEventArgs e) => MainTabs.SelectedIndex=1;
+ void AboutMenu_Click(object sender,RoutedEventArgs e) => MainTabs.SelectedIndex=2;
+ void CheckUpdatesMenu_Click(object sender,RoutedEventArgs e) { MainTabs.SelectedIndex=2; CheckUpdates_Click(sender,e); }
+ void OpenProject_Click(object sender,RoutedEventArgs e) { Process.Start(new ProcessStartInfo("https://github.com/Brcak/ConsoleUARTPro"){UseShellExecute=true}); }
  record Prefs(int Mode,bool Database,bool Pico,bool Esp,bool Pi,bool Boardview,bool Thermal,bool Logic); }
